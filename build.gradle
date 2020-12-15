@@ -1,0 +1,148 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+    }
+}
+        
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+version = '1.0'
+group = 'com.bsixel.packutils' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'etheralt-pack-utils'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+minecraft {
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    //mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'snapshot', version: '20171003-1.12'
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
+}
+
+repositories {
+    maven {
+        name "tinkers+jei+mantle"
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven {
+        name "COFH Maven"
+        url "http://maven.covers1624.net"
+    }
+    maven {
+        name "Crafttweaker etc Maven"
+        url "http://maven.blamejared.com"
+    }
+    maven {
+        url "https://maven.chaosfield.at"
+    }
+    maven {
+        url "https://minecraft.curseforge.com/api/maven/"
+    }
+    maven {
+        url "http://maven.mcmoddev.com"
+    }
+    maven {
+        url "https://tehnut.info/maven"
+    }
+}
+
+def mcVersion = '1.12.2'
+def jeiVersion = '4.16.1.302'
+
+dependencies {
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2854'
+
+    // Version of mantle without staircase reflection issue
+    //compile files("./libs/Mantle-1.12-1.3.3.56_DEV.jar")
+    runtime "slimeknights.mantle:Mantle:1.12-1.3.3.55"
+//    compile files("./libs/TConstruct-1.12.2-2.13.0.183.jar")
+//    runtime files("./libs/Mantle-1.12-1.3.3.55.jar")
+    compile "slimeknights:TConstruct:1.12.2-2.13.0.183"
+
+
+    // Recommended by TConstruct crew
+    runtime "mezz.jei:jei_${mcVersion}:${jeiVersion}:api"
+    compile "mezz.jei:jei_${mcVersion}:${jeiVersion}"
+
+    compile "cofh:RedstoneFlux:1.12-2.1.0.7:universal"
+
+    compile files("./libs/geneticsreborn-1.12-1.29.jar")
+    compile files("./libs/Nutrition-1.12.2-4.6.1.jar")
+    compile files("./libs/SGCraft-2.0.5.jar")
+    compile files("./libs/VillageNames-1.12.2-4.1.1.jar")
+
+}
+
+// Example for how to get properties into the manifest for reading by the runtime..
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "etheralt-pack-utils",
+            "Specification-Vendor": "Morthaden",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"Morthaden",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar') 
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
