@@ -20,6 +20,11 @@ public class StargateData extends WorldSavedData {
     // All the stargates - each stargate has a NBTTagCompound entry under its address
     private NBTTagCompound stargateData = new NBTTagCompound();
 
+    public StargateData(String tagName) {
+        super(tagName);
+        markDirty();
+    }
+
     public StargateData() {
         super(DATA_NAME);
         markDirty();

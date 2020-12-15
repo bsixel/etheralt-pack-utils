@@ -12,11 +12,7 @@ import slimeknights.tconstruct.library.utils.ToolHelper;
 
 public class EventFireSpecialArrowHandler {
 
-    //private static final ArrayList<Item> tinkersBowItemsList = new ArrayList<>(Arrays.asList(new ShortBow(), new LongBow(), new CrossBow()));
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    //public void fireTconstructArrow(ArrowLooseEvent event) {
-    //
     public void fireTconstructBow(TinkerToolEvent.OnBowShoot event) {
         ItemStack usedItemStack = event.itemStack;
 
