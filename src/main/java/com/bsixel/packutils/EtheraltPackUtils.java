@@ -1,9 +1,9 @@
 package com.bsixel.packutils;
 
 import com.bsixel.packutils.commands.StargateHelperCommand;
-import com.bsixel.packutils.events.EventEatGrassHandler;
-import com.bsixel.packutils.events.EventFireSpecialArrowHandler;
-import com.bsixel.packutils.events.StargateEventHandler;
+import com.bsixel.packutils.events.geneticscompat.EventEatGrassHandler;
+import com.bsixel.packutils.events.geneticscompat.EventFireSpecialArrowHandler;
+import com.bsixel.packutils.events.stargate.StargateEventHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
@@ -33,12 +33,13 @@ public class EtheraltPackUtils {
         Configuration config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + File.separator + "etheraltpackutils.cfg"));
 
         initConfig(config);
+        boolean isGeneticsLoaded = Loader.isModLoaded("geneticsreborn");
 
-        if (Loader.isModLoaded("nutrition") && integrateNutrition) { // Compat between Genetics Reborn and Nutrition
+        if (isGeneticsLoaded && Loader.isModLoaded("nutrition") && integrateNutrition) { // Compat between Genetics Reborn and Nutrition
             logger.info("Loading compat between genetics reborn and Nutrition");
             MinecraftForge.EVENT_BUS.register(new EventEatGrassHandler());
         }
-        if (Loader.isModLoaded("tconstruct") && integrateTinkers) { // Compat between Genetics Reborn and Tinkers Construct
+        if (isGeneticsLoaded && Loader.isModLoaded("tconstruct") && integrateTinkers) { // Compat between Genetics Reborn and Tinkers Construct
             logger.info("Loading compat between genetics reborn and Tinker's Construct");
             MinecraftForge.EVENT_BUS.register(new EventFireSpecialArrowHandler());
         }

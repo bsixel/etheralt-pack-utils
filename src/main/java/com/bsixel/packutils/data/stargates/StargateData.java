@@ -1,5 +1,6 @@
 package com.bsixel.packutils.data.stargates;
 
+import com.bsixel.packutils.EtheraltPackUtils;
 import com.bsixel.packutils.ModInfo;
 import com.bsixel.packutils.modhelpers.SafeVillageNamesLoader;
 import gcewing.sg.event.SGMergeEvent;
@@ -11,11 +12,13 @@ import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.fml.common.Loader;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class StargateData extends WorldSavedData {
     private static final String DATA_NAME = ModInfo.MODID + "StargateData";
+    private static Map<String, String> liveAddressMap = new HashMap<>();
 
     // All the stargates - each stargate has a NBTTagCompound entry under its address
     private NBTTagCompound stargateData = new NBTTagCompound();
@@ -33,6 +36,11 @@ public class StargateData extends WorldSavedData {
     @Override
     public void readFromNBT(NBTTagCompound data) {
         stargateData = data;
+        EtheraltPackUtils.logger.info("Loading Stargate data from NBT");
+        liveAddressMap = new HashMap<>();
+        for (String address : stargateData.getKeySet()) {
+            liveAddressMap.put(address, stargateData.getCompoundTag(address).getString("locationName"));
+        }
     }
 
     @Override
@@ -40,9 +48,16 @@ public class StargateData extends WorldSavedData {
         for (String address : stargateData.getKeySet()) {
             data.setTag(address, stargateData.getCompoundTag(address));
         }
-//        data.setTag("locations", stargateLocations);
-//        data.setTag("names", stargateNames); // TODO: Add names to stargates if we've loaded the VillageNames mod
+        markDirty();
         return data;
+    }
+
+    public static Set<String> getLiveAddresses() {
+        return liveAddressMap.keySet();
+    }
+
+    public static String getLiveNameForAddress(String addr) {
+        return liveAddressMap.getOrDefault(addr, "Unknown Structure");
     }
 
     /**
@@ -77,6 +92,7 @@ public class StargateData extends WorldSavedData {
     public static void removeAddressData(World world, String address) {
         StargateData data = getData(world);
         data.stargateData.removeTag(address);
+        liveAddressMap.remove(address);
 
         data.markDirty(); // Always last
     }
@@ -88,7 +104,7 @@ public class StargateData extends WorldSavedData {
      * Keys on the return compound:
      * xPos, yPos, zPos: Integers with the position data for the stargate base
      * dimension: String of the dimname of the world the gate (should) be in. Note this may be wrong if someone did something odd with the initial set.
-     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unnamed Location"
+     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
     public static NBTTagCompound setAddressData(SGMergeEvent event) {
         return setAddressData(event.getWorld(), event.getGatePosition(), event.getWorldName(), event.getAddress());
@@ -104,7 +120,7 @@ public class StargateData extends WorldSavedData {
      * Keys on the return compound:
      * xPos, yPos, zPos: Integers with the position data for the stargate base
      * dimension: String of the dimname of the world the gate (should) be in. Note this may be wrong if someone did something odd with the initial set.
-     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unnamed Location"
+     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
     public static NBTTagCompound setAddressData(World world, BlockPos pos, String dimName, String address) {
         StargateData worldData = getData(world);
@@ -117,11 +133,12 @@ public class StargateData extends WorldSavedData {
         if (Loader.isModLoaded("villagenames")) { // If we've got Village Names installed, use the name of the structure the Stargate spawned at if it exists
             structName = SafeVillageNamesLoader.villageNameForPosition(world, pos);
         } else {
-            structName = "Unnamed Location";
+            structName = "Unknown Location";
         }
         eventData.setString("locationName", structName);
 
         worldData.stargateData.setTag(address, eventData);
+        liveAddressMap.put(address, structName);
 
         worldData.markDirty(); // Always last, except return
         return eventData;
@@ -135,11 +152,11 @@ public class StargateData extends WorldSavedData {
      * Keys on the return compound:
      * xPos, yPos, zPos: Integers with the position data for the stargate base
      * dimension: String of the dimname of the world the gate (should) be in. Note this may be wrong if someone did something odd with the initial set.
-     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unnamed Location"
+     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
     public static NBTTagCompound getDataForAddress(World world, String address) {
         StargateData worldData = getData(world);
-        return worldData.stargateData;
+        return worldData.stargateData.getCompoundTag(address);
     }
 
     /**
@@ -149,7 +166,7 @@ public class StargateData extends WorldSavedData {
      * Keys on the return compound:
      * xPos, yPos, zPos: Integers with the position data for the stargate base
      * dimension: String of the dimname of the world the gate (should) be in. Note this may be wrong if someone did something odd with the initial set.
-     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unnamed Location"
+     * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
     public NBTTagCompound getDataForAddress(String address) {
         return this.stargateData.getCompoundTag(address);

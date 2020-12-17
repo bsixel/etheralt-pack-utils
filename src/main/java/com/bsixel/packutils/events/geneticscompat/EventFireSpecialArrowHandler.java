@@ -1,4 +1,4 @@
-package com.bsixel.packutils.events;
+package com.bsixel.packutils.events.geneticscompat;
 
 import com.theundertaker11.geneticsreborn.api.capability.genes.EnumGenes;
 import com.theundertaker11.geneticsreborn.api.capability.genes.IGenes;

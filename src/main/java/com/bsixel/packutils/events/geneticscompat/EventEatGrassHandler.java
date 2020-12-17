@@ -1,4 +1,4 @@
-package com.bsixel.packutils.events;
+package com.bsixel.packutils.events.geneticscompat;
 
 import ca.wescook.nutrition.capabilities.INutrientManager;
 import ca.wescook.nutrition.nutrients.Nutrient;

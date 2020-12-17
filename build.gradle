@@ -15,24 +15,21 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath 'commons-io:commons-io:2.4'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'com.github.johnrengelman.shadow'
-
 
 jar {
-    classifier = 'original'
+    classifier = ''
 }
 
 archivesBaseName = jarName
 
 repositories {
-    maven { url = "http://files.minecraftforge.net/maven" } // spongeforge
+    maven { url = "http://files.minecraftforge.net/maven" }
     maven {
         name "tinkers+jei+mantle"
         url "http://dvs1.progwml6.com/files/maven"
@@ -100,9 +97,6 @@ dependencies {
     deobfCompile ('net.malisis:malisiscore:1.12.2-6.4.0') {
         transitive = false
     }
-    /*deobfCompile ('com.almuradev:malisiscore:1.12.2-6.4.3-SNAPSHOT-dev') {
-        transitive = false
-    }*/
 }
 
 deobfMcMCP { failOnAtError = false }
@@ -117,49 +111,9 @@ minecraft {
 }
 
 sourceSets.main {
-    compileClasspath += files("lib")
+    // TODO: Include if we need to embed dependencies
+//    compileClasspath += files("lib")
     java.srcDirs "src/base", "src/mod"
-    resources.srcDirs "src/resources"
-}
-
-processResources {
-
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.mcversion
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version, 'modid':project.jarName
-    }
-
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-shadowJar {
-    mainSpec.sourcePaths.clear()
-    dependsOn reobfJar
-
-    classifier ''
-
-    exclude 'dummyThing'
-    relocate 'com.typesafe.config', 'configurate.typesafe.config'
-    dependencies {
-        include dependency('org.spongepowered:configurate-core')
-        include dependency('org.spongepowered:configurate-yaml')
-        include dependency('org.yaml:snakeyaml')
-    }
-    afterEvaluate {
-        from zipTree(reobfJar.jar)
-    }
-}
-
-artifacts {
-    archives shadowJar
+    // TODO: Include if we ever get textures someday
+//    resources.srcDirs "src/resources"
 }

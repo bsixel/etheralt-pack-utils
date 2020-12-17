@@ -1,4 +1,4 @@
-package com.bsixel.packutils.events;
+package com.bsixel.packutils.events.stargate;
 
 import com.bsixel.packutils.EtheraltPackUtils;
 import com.bsixel.packutils.data.stargates.StargateData;
@@ -16,11 +16,8 @@ public class StargateEventHandler {
             StargateData.removeAddressData(event);
         } else {
             NBTTagCompound stargateEventData = StargateData.setAddressData(event);
-            for (EntityPlayerMP player : event.getWorld().getMinecraftServer().getPlayerList().getPlayers()) {
-                String infoString = "New stargate with address " + event.getAddress() + " , at position " + event.getGatePosition().toString() + " named " + stargateEventData.getString("locationName");
-                player.sendMessage(new TextComponentString(infoString));
-                EtheraltPackUtils.logger.info(infoString);
-            }
+            String infoString = "New stargate with address " + event.getAddress() + " , at position " + event.getGatePosition().toString() + " named " + stargateEventData.getString("locationName");
+            EtheraltPackUtils.logger.info(infoString);
         }
     }
 
