@@ -29,6 +29,7 @@ jar {
 archivesBaseName = jarName
 
 repositories {
+    maven { url = "https://mvnrepository.com/"}
     maven { url = "http://files.minecraftforge.net/maven" }
     maven {
         name "tinkers+jei+mantle"
@@ -94,9 +95,9 @@ dependencies {
     //deobfCompile "cofh:ThermalExpansion:1.12.2-5.5.3.41:universal"
     //deobfCompile "cofh:ThermalFoundation:1.12.2-2.6.2.26:universal"
     //deobfCompile "cofh:ThermalDynamics:1.12.2-2.5.5.21:universal"
-    deobfCompile ('net.malisis:malisiscore:1.12.2-6.4.0') {
-        transitive = false
-    }
+    // https://mvnrepository.com/artifact/net.malisis/malisiscore
+    compile group: 'net.malisis', name: 'malisiscore', version: '1.12.2-6.4.0'
+
 }
 
 deobfMcMCP { failOnAtError = false }
