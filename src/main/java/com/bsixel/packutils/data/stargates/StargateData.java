@@ -4,6 +4,7 @@ import com.bsixel.packutils.EtheraltPackUtils;
 import com.bsixel.packutils.ModInfo;
 import com.bsixel.packutils.modhelpers.SafeVillageNamesLoader;
 import gcewing.sg.event.SGMergeEvent;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -107,14 +108,13 @@ public class StargateData extends WorldSavedData {
      * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
     public static NBTTagCompound setAddressData(SGMergeEvent event) {
-        return setAddressData(event.getWorld(), event.getGatePosition(), event.getWorldName(), event.getAddress());
+        return setAddressData(event.getWorld(), event.getGatePosition(), event.getAddress());
     }
 
     /**
      * Static method for setting the global data of a single Stargate's location for future use
      * @param world The world the Stargate is in
      * @param pos The position of the Stargate base
-     * @param dimName The name of the dimension the Stargate is in. I guess this is useful if the dimname from world.getName isn't what you want.
      * @param address The address of the gate itself
      *  @return A NBTTagCompound containing the data for this specific address.
      * Keys on the return compound:
@@ -122,13 +122,19 @@ public class StargateData extends WorldSavedData {
      * dimension: String of the dimname of the world the gate (should) be in. Note this may be wrong if someone did something odd with the initial set.
      * locationName: String of the name of the location this gate was spawned - for now, unless you have the Village Names mod this will just be "Unknown Location"
      */
-    public static NBTTagCompound setAddressData(World world, BlockPos pos, String dimName, String address) {
+    public static NBTTagCompound setAddressData(World world, BlockPos pos, String address) {
         StargateData worldData = getData(world);
         NBTTagCompound eventData = new NBTTagCompound();
         eventData.setInteger("xPos", pos.getX());
         eventData.setInteger("yPos", pos.getY());
         eventData.setInteger("zPos", pos.getZ());
-        eventData.setString("dimension", dimName);
+        eventData.setString("dimension", world.provider.getDimensionType().name());
+        eventData.setInteger("dimid", world.provider.getDimension());
+        // Check if a player is close enough to have placed the final piece - otherwise it was worldgen that made the gate
+        EntityPlayer closestPlayer = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 15.0d, false);
+        // If the closestPlayer is non-null then a player made the gate
+        // Useful data in case we want to only give access to worldgen-made gates
+        eventData.setBoolean("isPlayerMade", closestPlayer != null);
         String structName;
         if (Loader.isModLoaded("villagenames")) { // If we've got Village Names installed, use the name of the structure the Stargate spawned at if it exists
             structName = SafeVillageNamesLoader.villageNameForPosition(world, pos);
@@ -136,7 +142,6 @@ public class StargateData extends WorldSavedData {
             structName = "Unknown Location";
         }
         eventData.setString("locationName", structName);
-
         worldData.stargateData.setTag(address, eventData);
         liveAddressMap.put(address, structName);
 
@@ -180,11 +185,59 @@ public class StargateData extends WorldSavedData {
         return getData(world).stargateData.getKeySet();
     }
 
+    /**
+     * Static getter for a map of all addresses and whether they were made by a player
+     * @param world World from which to get addresses
+     * @return A Map <addr,isPlayerMade>
+     */
+    public static Map<String, Boolean> getGateMergetypeMap(World world) {
+        NBTTagCompound data = getData(world).stargateData;
+        Map<String, Boolean> map = new HashMap<>();
+        for (String addr : data.getKeySet()) {
+            map.put(addr, data.getCompoundTag(addr).getBoolean("isPlayerMade"));
+        }
+        return map;
+    }
+
+    /**
+     * Static getter for a set of all gate addresses and their dimensions
+     * @param world
+     * @return
+     */
+    public static Map<String, String> getGateDimMap(World world) {
+        NBTTagCompound data = getData(world).stargateData;
+        Map<String, String> map = new HashMap<>();
+        for (String address : data.getKeySet()) {
+            map.put(address, data.getCompoundTag(address).getString("dimension"));
+        }
+        return map;
+    }
+
+    /**
+     * Static getter for a map of all addresses -> location names - name will be empty if the Village Names mod is not installed or it's player made.
+     * @param world The world to use to extract addresses from - grabs from the whole global world instance not just "nether" "overworld"
+     * @return A map of all <address, locationName> pairs
+     */
     public static Map<String, String> getGateNameMap(World world) {
         NBTTagCompound data = getData(world).stargateData;
         Map<String, String> map = new HashMap<>();
         for (String address : data.getKeySet()) {
             map.put(address, data.getCompoundTag(address).getString("locationName"));
+        }
+        return map;
+    }
+
+    /**
+     * Same as getGateNameMap except that the name also includes the dimension the location is in
+     * @param world The world to use to extract addresses from - grabs from the whole global world instance not just "nether" "overworld"
+     * @return A map of all <address, locationName - [Dimension]> pairs
+     */
+    public static Map<String, String> getDetailedGateNameMap(World world) {
+        NBTTagCompound data = getData(world).stargateData;
+        Map<String, String> map = new HashMap<>();
+        for (String address : data.getKeySet()) {
+            String descr = data.getCompoundTag(address).getString("locationName") + " (" + data.getCompoundTag(address).getString("dimension") + ")";
+            map.put(address, descr);
         }
         return map;
     }

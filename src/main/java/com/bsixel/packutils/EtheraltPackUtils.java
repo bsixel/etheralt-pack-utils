@@ -1,8 +1,10 @@
 package com.bsixel.packutils;
 
 import com.bsixel.packutils.commands.StargateHelperCommand;
+import com.bsixel.packutils.commands.UtilityCommand;
 import com.bsixel.packutils.events.geneticscompat.EventEatGrassHandler;
 import com.bsixel.packutils.events.geneticscompat.EventFireSpecialArrowHandler;
+import com.bsixel.packutils.events.loot.SGLootHandler;
 import com.bsixel.packutils.events.stargate.StargateEventHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -35,6 +37,9 @@ public class EtheraltPackUtils {
         initConfig(config);
         boolean isGeneticsLoaded = Loader.isModLoaded("geneticsreborn");
 
+        // Load command helper event for base utils
+        MinecraftForge.EVENT_BUS.register(new UtilityCommand());
+
         if (isGeneticsLoaded && Loader.isModLoaded("nutrition") && integrateNutrition) { // Compat between Genetics Reborn and Nutrition
             logger.info("Loading compat between genetics reborn and Nutrition");
             MinecraftForge.EVENT_BUS.register(new EventEatGrassHandler());
@@ -46,6 +51,7 @@ public class EtheraltPackUtils {
         if (Loader.isModLoaded("sgcraft") && integrateStargate) { // TODO: Added event handling for Stargate Network
             logger.info("Loading integration for Stargate Network");
             MinecraftForge.EVENT_BUS.register(new StargateEventHandler());
+            MinecraftForge.EVENT_BUS.register(new SGLootHandler());
         }
     }
 
@@ -56,6 +62,8 @@ public class EtheraltPackUtils {
             logger.info("Registering commands for sgcraft integration!");
             event.registerServerCommand(new StargateHelperCommand());
         }
+        // Register standard utils commands
+        event.registerServerCommand(new UtilityCommand());
     }
 
     @EventHandler
