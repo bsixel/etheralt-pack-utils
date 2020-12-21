@@ -117,12 +117,34 @@ minecraft {
     mappings = 'snapshot_20180808'
     useDepAts = true
     makeObfSourceJar = false
+
+    // Auto mod version
+    replace "AUTO_VERSION", project.version
+    replaceIn "ModInfo.java"
+
 }
 
 sourceSets.main {
-    // TODO: Include if we need to embed dependencies
-//    compileClasspath += files("lib")
-    java.srcDirs "src/base", "src/mod"
-    // TODO: Include if we ever get textures someday
-//    resources.srcDirs "src/resources"
+    compileClasspath += files("lib")
+    resources.srcDirs "src/resources"
+}
+
+// Auto updated version info
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.mcversion
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version, 'modid':project.jarName
+    }
+
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
 }

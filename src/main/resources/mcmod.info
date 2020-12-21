@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "${modid}",
+    "name": "Etheralt Pack Utils",
+    "description": "General utilities and integrations between various mods.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/bsixel/etheralt-pack-utils",
+    "updateUrl": "",
+    "authors": ["Morthaden"],
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [],
+    "requiredMods": ["forge@14.23.5.2838"]
+  }
+]

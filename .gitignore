@@ -8,6 +8,4 @@ classes/
 *.iml
 lib/*
 run/
-.gradle/4.9/file*
-.gradle/4.9/taskHistory
-*.lock
+.gradle/
