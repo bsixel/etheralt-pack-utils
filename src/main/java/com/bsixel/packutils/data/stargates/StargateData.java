@@ -37,7 +37,7 @@ public class StargateData extends WorldSavedData {
     @Override
     public void readFromNBT(NBTTagCompound data) {
         stargateData = data;
-        EtheraltPackUtils.logger.info("Loading Stargate data from NBT");
+        EtheraltPackUtils.logger.debug("Loading Stargate data from NBT");
         liveAddressMap = new HashMap<>();
         for (String address : stargateData.getKeySet()) {
             liveAddressMap.put(address, stargateData.getCompoundTag(address).getString("locationName"));

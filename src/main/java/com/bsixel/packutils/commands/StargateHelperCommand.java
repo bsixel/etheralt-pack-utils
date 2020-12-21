@@ -57,7 +57,6 @@ public class StargateHelperCommand extends CommandBase {
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         List<String> list = new ArrayList<>();
-        EtheraltPackUtils.logger.info("Trying command completion for SG helper..." + args.length);
         if (args.length == 0 || args[0].equals("")) {
             return subCommands;
         } else {

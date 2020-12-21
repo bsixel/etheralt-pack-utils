@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -73,7 +74,6 @@ public class UtilityCommand extends CommandBase {
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         List<String> list = new ArrayList<>();
-        EtheraltPackUtils.logger.info("Trying command completion for Utils... " + args.length);
         if (args.length == 0 || args[0].equals("")) {
             return subCommands;
         } else { // This will likely be a mess, there's a lot going on... I'm sure there's a better way but I'm tired. TODO: Improve
@@ -120,7 +120,7 @@ public class UtilityCommand extends CommandBase {
             EtheraltPackUtils.logger.error("Error! No valid target provided to dispel!");
             return;
         }
-        if (args.length >= 2) {
+        if (args.length > 2) { // They provided a specific potion to remove
             Potion potion = Potion.getPotionFromResourceLocation(args[2]);
             if (potion == null) {
                 sender.sendMessage(new TextComponentString("Error! You must provide a valid potion to dispel!"));
@@ -129,7 +129,9 @@ public class UtilityCommand extends CommandBase {
                 targets.forEach(target -> target.removePotionEffect(potion));
             }
         } else {
-            targets.forEach(target -> target.getActivePotionEffects().forEach(effect -> target.removePotionEffect(effect.getPotion())));
+            targets.forEach(target -> {
+                target.getActivePotionEffects().stream().map(PotionEffect::getPotion).collect(Collectors.toList()).forEach(target::removePotionEffect);
+            });
         }
     }
 

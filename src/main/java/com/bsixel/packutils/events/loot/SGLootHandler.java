@@ -28,12 +28,12 @@ public class SGLootHandler {
 
     @SubscribeEvent
     public void onLootTableLoad(LootTableLoadEvent event) {
-        EtheraltPackUtils.logger.info("Generating loot for tables - hopefully adding a book of addresses!");
+        EtheraltPackUtils.logger.debug("Generating loot for tables - hopefully adding a book of addresses!");
         ResourceLocation eventName = event.getName();
         // For now just add the random address book to all tables for testing
         LootPool main = event.getTable().getPool("main");
         if (eventName.getPath().contains("chest") && main != null) {
-            EtheraltPackUtils.logger.info("Actually adding address table loot!");
+            EtheraltPackUtils.logger.debug("Actually adding address table loot!");
             World world = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
             // Apparently this is the mess required to generate a different book each time... There's gotta be an easier way right?
             main.addEntry(new LootEntryItem(Items.WRITTEN_BOOK, 5, 0, new LootFunction[]{ new LootFunction(new LootCondition[0]) {
@@ -51,7 +51,7 @@ public class SGLootHandler {
      * @return a Book item with addresses written in it
      */
     private static ItemStack genAddressBookForWorld(World world, ItemStack book) {
-        EtheraltPackUtils.logger.info("Made a new address book!");
+        EtheraltPackUtils.logger.debug("Made a new address book!");
         book.setTagInfo("author", new NBTTagString("Ancient Scholar"));
         NBTTagList nbtForPages = new NBTTagList();
         Map<String, Boolean> addrPlayermadeMap = StargateData.getGateMergetypeMap(world);
