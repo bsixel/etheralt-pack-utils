@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 public class StargateHelperCommand extends CommandBase {
 
     private static final String name = "sghelper";
-    private static final List<String> subCommands = Arrays.asList("list", "teleport");
+    private static final List<String> subCommands = Arrays.asList("check", "list", "teleport");
 
     @Override
     public String getName() {
@@ -43,6 +43,9 @@ public class StargateHelperCommand extends CommandBase {
         }
         String subCommand = args[0];
         switch (subCommand) {
+            case "check":
+                infoAddress(server, sender, args);
+                break;
             case "list":
                 listGates(server, sender);
                 break;
@@ -92,6 +95,28 @@ public class StargateHelperCommand extends CommandBase {
         }
     }
 
+    private void infoAddress(MinecraftServer server, ICommandSender sender, String[] args) {
+        if (args.length < 2) {
+            sender.sendMessage(new TextComponentString("Usage: /sghelper check <address>").setStyle(new Style().setColor(TextFormatting.RED)));
+            return;
+        }
+        NBTTagCompound addressData = StargateData.getDataForAddress(server.getEntityWorld(), args[1]);
+        if (addressData == null || addressData.isEmpty()) {
+            sender.sendMessage(new TextComponentString("Error! No known gate with address " + args[1] + " to get coordinates for!").setStyle(new Style().setColor(TextFormatting.RED)));
+            return;
+        }
+        double x = addressData.getDouble("xPos");
+        double y = addressData.getDouble("yPos");
+        double z = addressData.getDouble("zPos");
+        int dimid;
+        if (addressData.hasKey("dimid")) {
+            dimid = addressData.getInteger("dimid");
+        } else {
+            dimid = 0; // Default to overworld if for some reason there isn't a dimid
+        }
+        sender.sendMessage(new TextComponentString("" + x + " " + y + " " + z + " " + dimid).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+    }
+
     private void teleportToAddress(MinecraftServer server, ICommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(new TextComponentString("Usage: /sghelper teleport <address>").setStyle(new Style().setColor(TextFormatting.RED)));
@@ -100,8 +125,9 @@ public class StargateHelperCommand extends CommandBase {
         try {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             NBTTagCompound addressData = StargateData.getDataForAddress(server.getEntityWorld(), args[1]);
-            if (addressData == null) {
+            if (addressData == null || addressData.isEmpty()) {
                 sender.sendMessage(new TextComponentString("Error! No known gate with address " + args[1] + " to teleport to!").setStyle(new Style().setColor(TextFormatting.RED)));
+                return;
             }
             double x = addressData.getDouble("xPos");
             double y = addressData.getDouble("yPos");
@@ -122,6 +148,6 @@ public class StargateHelperCommand extends CommandBase {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 3;
+        return 2;
     }
 }

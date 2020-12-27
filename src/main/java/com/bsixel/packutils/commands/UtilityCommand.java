@@ -33,7 +33,7 @@ public class UtilityCommand extends CommandBase {
     private static final Map<EntityPlayer, Boolean> flyingPlayerMap = new HashMap<>();
     private static final Map<EntityPlayer, Boolean> noClipPlayerMap = new HashMap<>();
     private static final String name = "utils";
-    private static final List<String> subCommands = Arrays.asList("dispel", "feed", "fly", "noClip", "spawn");
+    private static final List<String> subCommands = Arrays.asList("dispel", "feed",  "spawn");
 
     @Override
     public String getName() {
@@ -58,12 +58,6 @@ public class UtilityCommand extends CommandBase {
                 break;
             case "feed":
                 feedPlayer(sender);
-                break;
-            case "fly":
-                toggleFlightForPlayer(sender);
-                break;
-            case "noClip":
-                toggleNoClip(sender);
                 break;
             case "spawn":
                 teleportToSpawn(sender);
@@ -163,7 +157,8 @@ public class UtilityCommand extends CommandBase {
         }
     }
 
-    private void toggleFlightForPlayer(ICommandSender sender) {
+    // TODO: Figure out how to do flight etc without conflicting with other flight mechanisms
+    /*private void toggleFlightForPlayer(ICommandSender sender) {
         try {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             if (flyingPlayerMap.containsKey(player)) {
@@ -181,9 +176,10 @@ public class UtilityCommand extends CommandBase {
             sender.sendMessage(new TextComponentString("Error! Only a player can use this command!"));
             EtheraltPackUtils.logger.error("Error! Command sender is not a player and thus cannot have flight!");
         }
-    }
+    }*/
 
-    private void toggleNoClip(ICommandSender sender) {
+    // TODO: Figure out how to do flight etc without conflicting with other flight mechanisms
+    /*private void toggleNoClip(ICommandSender sender) {
         try {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             if (player.isSpectator()) { // Don't do anything for players in spectator mode
@@ -208,14 +204,15 @@ public class UtilityCommand extends CommandBase {
             sender.sendMessage(new TextComponentString("Error! Only a player can use this command!"));
             EtheraltPackUtils.logger.error("Error! Command sender is not a player and thus cannot have flight!");
         }
-    }
+    }*/
 
     @Override
     public int getRequiredPermissionLevel() {
         return 3;
     }
 
-    // Silliness requires us to update on every event to keep the player flying or noclipped
+    // TODO: Figure out how to do flight etc without conflicting with other flight mechanisms
+    /*// Silliness requires us to update on every event to keep the player flying or noclipped
     @SubscribeEvent
     public void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
         if (!(event.getEntityLiving() instanceof EntityPlayer)) {
@@ -230,11 +227,10 @@ public class UtilityCommand extends CommandBase {
             if (flyingPlayerMap.containsKey(player) && flyingPlayerMap.get(player)) {
                 player.capabilities.allowFlying = true;
             } else {
-                player.capabilities.isFlying = false;
-                player.capabilities.allowFlying = false;
+                player.capabilities.allowFlying = player.isCreative();
             }
         }
         player.sendPlayerAbilities();
-    }
+    }*/
 
 }
