@@ -3,6 +3,9 @@ package com.bsixel.packutils.commands;
 import com.bsixel.packutils.EtheraltPackUtils;
 import com.bsixel.packutils.data.stargates.StargateData;
 import com.bsixel.packutils.utilities.BasicTeleporter;
+import gcewing.sg.block.SGBaseBlock;
+import gcewing.sg.block.SGBlock;
+import gcewing.sg.tileentity.SGBaseTE;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -10,6 +13,7 @@ import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
@@ -114,7 +118,12 @@ public class StargateHelperCommand extends CommandBase {
         } else {
             dimid = 0; // Default to overworld if for some reason there isn't a dimid
         }
-        sender.sendMessage(new TextComponentString("" + x + " " + y + " " + z + " " + dimid).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+        TileEntity te = server.getWorld(dimid).getTileEntity(new BlockPos(x, y, z));
+        boolean hasIris = false;
+        if (te instanceof SGBaseTE) { // Also implicitly covers null check
+            hasIris = ((SGBaseTE) te).irisIsClosed();
+        }
+        sender.sendMessage(new TextComponentString("" + x + " " + y + " " + z + " " + dimid + " " + hasIris).setStyle(new Style().setColor(TextFormatting.YELLOW)));
     }
 
     private void teleportToAddress(MinecraftServer server, ICommandSender sender, String[] args) {

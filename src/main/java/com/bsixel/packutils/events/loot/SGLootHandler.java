@@ -36,7 +36,7 @@ public class SGLootHandler {
             EtheraltPackUtils.logger.debug("Actually adding address table loot!");
             World world = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
             // Apparently this is the mess required to generate a different book each time... There's gotta be an easier way right?
-            main.addEntry(new LootEntryItem(Items.WRITTEN_BOOK, 5, 0, new LootFunction[]{ new LootFunction(new LootCondition[0]) {
+            main.addEntry(new LootEntryItem(Items.WRITTEN_BOOK, EtheraltPackUtils.addressBookLootWeight, 0, new LootFunction[]{ new LootFunction(new LootCondition[0]) {
                 @Override
                 public ItemStack apply(ItemStack itemStack, Random random, LootContext lootContext) {
                     return genAddressBookForWorld(world, itemStack);
@@ -60,7 +60,7 @@ public class SGLootHandler {
         // Randomize the list
         Collections.shuffle(addresses);
         // Limit to at most 5 addresses
-        int numAddresses = Math.min(addresses.size(), 5);
+        int numAddresses = Math.min(addresses.size(), EtheraltPackUtils.maxAddressesPerBook);
         if (numAddresses <= 0) { // If there aren't any known addresses, return nothing
             return null;
         }

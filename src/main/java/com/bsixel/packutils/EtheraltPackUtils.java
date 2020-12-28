@@ -76,6 +76,8 @@ public class EtheraltPackUtils {
     public static float defaultNutritionValue;
     public static Map<String, Float> grassNutritionValues = new HashMap<String, Float>();
     public static boolean integrateStargate;
+    public static int addressBookLootWeight;
+    public static int maxAddressesPerBook;
     public static boolean integrateTinkers;
 
     public static Configuration initConfig(Configuration config) {
@@ -109,6 +111,8 @@ public class EtheraltPackUtils {
 
         // Stargate Network settings
         integrateStargate = config.getBoolean("integrateStargate", stargateSettings, true, "Whether this mod should provide integration for Stargate Network. WIP");
+        addressBookLootWeight = config.getInt("addressBookRarity", stargateSettings, 5, 0, Integer.MAX_VALUE, "The chance of finding a book with addresses in loot tables. Higher is more common. Set to 0 to disable entirely");
+        maxAddressesPerBook = config.getInt("maxAddressesPerBook", stargateSettings, 5, 0, Integer.MAX_VALUE, "The maximum number of addresses that could wind up in a loot book. Set to 0 to disable. Note that it's also capped by how many gates exist, it won't go and spawn more.");
 
         // Tinkers Construct settings
         integrateTinkers = config.getBoolean("integrateTinkers", tinkersSettings, true, "Whether the mod should provide integration between Tinkers Construct and GeneticsReborn. If true, players with the infinity gene will have the effect applied to tinkers bows and crossbows, not just vanilla ones.");
