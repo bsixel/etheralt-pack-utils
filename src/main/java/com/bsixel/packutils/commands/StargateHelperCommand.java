@@ -3,9 +3,13 @@ package com.bsixel.packutils.commands;
 import com.bsixel.packutils.EtheraltPackUtils;
 import com.bsixel.packutils.data.stargates.StargateData;
 import com.bsixel.packutils.utilities.BasicTeleporter;
+import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 import gcewing.sg.block.SGBaseBlock;
 import gcewing.sg.block.SGBlock;
 import gcewing.sg.tileentity.SGBaseTE;
+import gcewing.sg.util.GeneralAddressRegistry;
+import gcewing.sg.util.SGAddressing;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -18,16 +22,23 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.world.World;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class StargateHelperCommand extends CommandBase {
 
     private static final String name = "sghelper";
-    private static final List<String> subCommands = Arrays.asList("check", "list", "teleport");
+    private static final List<String> subCommands = Arrays.asList("check", "generateGateData", "list", "teleport");
 
     @Override
     public String getName() {
@@ -49,6 +60,9 @@ public class StargateHelperCommand extends CommandBase {
         switch (subCommand) {
             case "check":
                 infoAddress(server, sender, args);
+                break;
+            case "generateGateData":
+                generateMissingGateData(server, sender);
                 break;
             case "list":
                 listGates(server, sender);
@@ -84,6 +98,45 @@ public class StargateHelperCommand extends CommandBase {
 
         }
         return list;
+    }
+
+    private void generateMissingGateData(MinecraftServer server, ICommandSender sender) {
+        ConfigurationNode root = null;
+        try {
+            root = GeneralAddressRegistry.createRootNode(Paths.get(".", "config", "SGCraft", "general.yml"));
+        } catch (IOException e) {
+            EtheraltPackUtils.logger.error("Error accessing config directory to regenerate gate data!");
+            e.printStackTrace();
+            return;
+        }
+        checkNotNull(root);
+        World currentWorld = server.getEntityWorld();
+        final ConfigurationNode worldsRoot = root.getNode("worlds");
+        try {
+            List<String> addresses = worldsRoot.getChildrenMap().get(currentWorld.getWorldInfo().getWorldName().toLowerCase()).getList(TypeToken.of(String.class));
+            Set<String> alreadyKnown = StargateData.getAllAddresses(currentWorld);
+            int added = 0;
+            for (String address : addresses) {
+                if (alreadyKnown.contains(address)) {
+                    break;
+                } else {
+                    EtheraltPackUtils.logger.info("Adding missing Stargate: " + address);
+                    SGBaseTE supposedStargate = SGAddressing.findAddressedStargate(address, server.getWorld(SGAddressing.dimensionSymbolsOf(address)), false);
+                    if (supposedStargate != null) {
+                        StargateData.setAddressData(supposedStargate.getWorld(), supposedStargate.getPos(), address);
+                        added++;
+                    }
+                }
+            }
+            sender.sendMessage(new TextComponentString("Successfully added " + added + " new gates. All gates will be considered world-generated and thus show up in lootable address books.").setStyle(new Style().setColor(TextFormatting.GREEN)));
+        } catch (ObjectMappingException | SGAddressing.AddressingError e) {
+            if (e instanceof  ObjectMappingException) {
+                EtheraltPackUtils.logger.error("Error! Could not find stargate world data for this world.");
+            } else {
+                EtheraltPackUtils.logger.error("Error! Could not parse address!");
+            }
+            e.printStackTrace();
+        }
     }
 
     private void listGates(MinecraftServer server, ICommandSender sender) {
